@@ -8,21 +8,30 @@ $('#velocityx').change( function() { velocity.x = $('#velocityx').val(); });
 $('#velocityy').change( function() { velocity.y = $('#velocityy').val(); });
 
 var startTime = new Date().getTime(); 
-
-// function animate(frame)
-// {
-// 	ball.setX( ball.getX() + velocity.x * (frame.timeDiff/1000) ); 
-// 	acceleration = 0; 
-// 	timeElapsed = new Date().getTime() - startTime; 
-// 	// console.log(timeElapsed); 
-// 	$('#time').val( timeElapsed )
-// 	ball.setX( startP.x + (velocity.x * timeElapsed / 1000 ) + ( 0.5 * acceleration * Math.pow(time, 2) ) ); 
-// }
-
+var animTimeStart; 
+var animTime; 
+var storeTime = 0; 
 var stopTimeElapsed = false; 
+
+
+
+$('#move').click(function(){
+	animTimeStart = new Date().getTime(); 
+
+	anim.start(); 
+}); 
+
+$('#stop').click(function(){
+	// startTime=new Date().getTime(); 
+	stopTimeElapsed=true;
+	storeTime = timeElapsed; 
+	anim.stop(); 
+})
 
 function animate(frame)
 {
+	animTime =  new Date().getTime() - animTimeStart; 
+
 	var iVelocity = Number($('#ivelocity').val()); 
 	var aVelocity = Number($('#avelocity').val()); 
 	var acceleration = Number($('#acceleration').val()); 
@@ -38,10 +47,11 @@ function animate(frame)
 	
 	// d = vi(t) + (.5)(a)(t^2)
 
-	console.log(ui.zoom)
+	// console.log(ui.zoom)
 
 	acceleration = 0; 
-	timeElapsed = stopTimeElapsed ? timeElapsed : new Date().getTime() - startTime; 
+	timeElapsed = ( storeTime +  animTime ); 
+	console.log(timeElapsed, storeTime)
 	$('#time').val( timeElapsed / 700 )
 	var deltaY = ( ( yTravelRate* (timeElapsed / 700) ) + ( 0.5 * ( acceleration + gravity ) * Math.pow(timeElapsed/700, 2) ) ); 
 	ball.setY( (startP.y - deltaY) ); 
@@ -172,18 +182,6 @@ function showPath()
 }
 
 var anim = new Kinetic.Animation(animate,layer); 
-
-$('#move').click(function(){
-	ui.zoomAdjust(); 
-	stopTimeElapsed = false; 
-	startTime = new Date().getTime(); 
-	// console.log(startTime)
-	anim.start(); 
-}); 
-
-$('#stop').click(function(){
-	anim.stop(); 
-})
 
 $('#direct').click(function(){
 
