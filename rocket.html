@@ -1,0 +1,171 @@
+<html>
+<body>
+
+<div class="header">
+<ul class="nav nav-pills pull-right">
+  <li><a href="#">About</a></li>
+  <li><a href="#">Contact</a></li>
+</ul>
+<h3 class="text-muted">Projectile Launcher</h3>
+</div>
+
+<div class='jumbotron' >
+	<div id='container' style='border:1px solid black;background-color:white;'>
+	</div>
+</div>
+
+<hr style='max-width:830px;' />
+
+<script src='js/jquery-1.11.1.min.js'></script>
+<script src='js/kinetic-v5.1.0.js'></script>
+<script src='js/jquery.timeago.js'></script>
+<script src='opentip-master/downloads/opentip-jquery.js'></script>
+<script src='opentip-master/lib/adapter-jquery.js'></script>
+<link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="css/bootstrap-theme.css">
+<link rel="stylesheet" type="text/css" href="css/bootstrap-theme.min.css">
+<link rel="stylesheet" type="text/css" href="rocket.css">
+<link rel="stylesheet" type="text/css" href="opentip-master/css/opentip.css">
+<script defer='defer'>
+	var stage= new Kinetic.Stage({
+		container:'container',
+		width:$('#container').width(),
+		height:300
+	});
+
+	var layer=new Kinetic.Layer(); 
+	var ballLayer=new Kinetic.Layer(); 
+	var groundLayer = new Kinetic.Layer(); 
+	var markerLayer = new Kinetic.Layer(); 
+
+	var ground = new Kinetic.Rect({
+		x:-10,
+		y:stage.getHeight()-50, 
+		width:stage.getWidth()+20,
+		height:70,
+		fill:'brown',
+		stroke:'2'
+	}); 
+
+	var startP={x:50,y:ground.getY()-10}
+	// var ballCannonGroup=new Kinetic.Group(); 
+	var ball=new Kinetic.Circle({
+		x:startP.x,
+		y:startP.y,
+		radius:10,
+		fill:'green',
+		stroke:'2' 
+	});  
+	var cannon; 
+	var cannonImage=new Image(); 
+	cannonImage.onload = function(){
+		cannon=new Kinetic.Image({
+		x:startP.x,
+		y:startP.y,
+		width:ball.width()*1.6,
+		height:ball.height()*1.6,
+		image:cannonImage,
+		offset:{x:ball.getWidth()*1.6/2,y:ball.getHeight()*1.9/2},
+		opacity:0,
+		}); 
+
+		// console.log(cannongImage.width()); 
+		layer.add(cannon); 
+		ball.moveToTop(); 
+		layer.draw(); 
+	}
+
+	cannonImage.src="images/CannonPart.png"; 
+
+	var quadLine = new Kinetic.Line({
+	  dash:[10,10],
+	  strokeWidth: 3,
+	  stroke: 'black',
+	  lineCap: 'round',
+	  id: 'quadLine',
+	  opacity: 0.3
+	});
+
+	var curveLayer = new Kinetic.Layer(); 
+
+	function drawCurves() {
+        var context = curveLayer.getContext();
+        context.clear();
+
+        // draw bezier
+        context.beginPath();
+        context.moveTo(10,10);
+        context.bezierCurveTo(12,15, 30,40, 10,50);
+        context.setAttr('strokeStyle', 'blue');
+        context.setAttr('lineWidth', 4);
+        context.stroke();
+      }
+
+	layer.add(ball);
+	// layer.add(ground); 
+	groundLayer.add(ground);  
+	stage.add(groundLayer);   
+	stage.add(layer); 
+	stage.add(curveLayer); 
+	stage.add(markerLayer); 
+
+	// drawCurves(); 
+
+
+</script>
+<br/>
+
+<div class='data_row'>
+<div class='row marketing'>
+	<div class='col-lg-6'>
+		<h4>Subheader1</h4>
+		<div>
+			<table border='0' >
+				<tr><td>Time</td> <td> <input id='time' > </td> </tr>
+				<tr><td>Initial Velocity</td> <td> <input id='time' > </td> </tr>
+				<tr><td>Additional Velocity</td> <td> <input id = 'avelocity' value='100' > </td> </tr>
+				<tr><td>Acceleration</td> <td> <input id = 'acceleration' value='0' > </td> </tr>
+				<tr><td>Angle</td> <td> <input id = 'angle' value='45' > </td> </tr>
+				<tr><td>Gravity</td> <td> <input id = 'gravity' value='-9.8' > </td> </tr>
+			</table>
+<!-- 			<label>Time:</label><input id='time' /> <br />
+			<label>Initial Velocity </label> <input id='ivelocity' value='0' /> <br />
+			<label>Additional Velocity</label> <input id = 'avelocity' value='50' > <br />
+			<label>Acceleration</label> <input id = 'acceleration' value='0' > <br />
+			<label>Angle</label> <input id = 'angle' value='45' > <br />
+			<label>Gravity</label> <input id = 'gravity' value='-9.8' > <br /> -->
+		</div>
+	</div>
+	<div class='col-lg-6'>
+		<h4>Subheader2</h4>
+		<div>
+<button id='move'>Move</button><button id='stop' >Stop</button><button id='direct' >Direct</button><button id='solution'>Solution</button> <button id='showpath'>Show Path</button> 
+		</div>
+		<h4>Subheader3</h4>
+		<div>
+			d= v<sub>i</sub>t+&frac12;at<sup>2</sup> <br />
+			v<sub>f</sub>= v<sub>i</sub><sup>2</sup>t+2ad <br />
+			v<sub>f</sub>= v<sub>i</sub>+at <br />
+		</div>
+
+	</div>
+</div>
+</div>
+
+<!-- <button id='move'>Move</button><button id='stop' >Stop</button>   <button id='direct' >Direct</button><button id='solution'>Solution</button> <button id='showpath'>Show Path</button> <button id='bigger'>Bigger</button>
+<button id='rotate'>Rotate</button>  <br />
+<label>Velocity</label>:
+	<div class='well well-sm hoverable'> <label>X </label><input id='velocityx' /><label>Y</label><input id='velocityy' /> </div> </button>
+	<div class='well well-sm hoverable' style='background-color:green' > 
+		 -->
+
+	</div>
+ <script src='js/bootstrap.js'></script>
+<script src='js/bootstrap.min.js'></script>
+
+<script src='rocket.js'></script>
+<link rel="stylesheet" type="text/css" href="rocket.css">
+
+</body>
+</html>
