@@ -16,6 +16,7 @@ var stopTimeElapsed = false;
 
 
 $('#move').click(function(){
+	stopTimeElapsed = false;
 	animTimeStart = new Date().getTime(); 
 
 	anim.start(); 
@@ -37,20 +38,14 @@ function animate(frame)
 	var acceleration = Number($('#acceleration').val()); 
 	var angle = Number($('#angle').val())
 	var gravity = Number($('#gravity').val()); 
-
-	// console.log( {"iVelocity":iVelocity, "aVelocity":aVelocity, "acceleration":acceleration, "angle": angle } ); 
-
+	
 	// /*Calculate X and Y Rates Here.*/
 	var xTravelRate = aVelocity * Math.cos( angle * Math.PI / 180 ) ; 
 	var yTravelRate = aVelocity * Math.sin( angle * Math.PI / 180 ) ; 
 	/*End of Calculate X and Y Rates Here.*/
-	
-	// d = vi(t) + (.5)(a)(t^2)
-
-	// console.log(ui.zoom)
 
 	acceleration = 0; 
-	timeElapsed = ( storeTime +  animTime ); 
+	timeElapsed = stopTimeElapsed ? timeElapsed : ( storeTime +  animTime ); 
 	console.log(timeElapsed, storeTime)
 	$('#time').val( timeElapsed / 700 )
 	var deltaY = ( ( yTravelRate* (timeElapsed / 700) ) + ( 0.5 * ( acceleration + gravity ) * Math.pow(timeElapsed/700, 2) ) ); 
@@ -64,8 +59,6 @@ function animate(frame)
 	}
 	var deltaX = ( xTravelRate * (timeElapsed / 700) ) + ( 0.5 * acceleration * Math.pow(timeElapsed / 700, 2) )
 	ball.setX( (startP.x + deltaX) 	); 		
-
-	// console.log( ball.getX() , ball.getY() )
 } 
 
 function showPath()
@@ -232,7 +225,7 @@ var gravity = Number($('#gravity').val());
 var xTravelRate = aVelocity * Math.cos( angle * Math.PI / 180 ) ; 
 var yTravelRate = aVelocity * Math.sin( angle * Math.PI / 180 ) ; 
 
-// console.log( getSolutionToTimeProblem() ); 
+console.log( getSolutionToTimeProblem() ); 
 // console.log(  )
 
 })
