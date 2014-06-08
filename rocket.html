@@ -27,6 +27,8 @@
 <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.min.css">
 <link rel="stylesheet" type="text/css" href="rocket.css">
 <link rel="stylesheet" type="text/css" href="opentip-master/css/opentip.css">
+<script src='js/bootstrap.js'></script>
+<script src='js/bootstrap.min.js'></script>
 <script defer='defer'>
 	var stage= new Kinetic.Stage({
 		container:'container',
@@ -49,7 +51,7 @@
 	}); 
 
 	var startP={x:50,y:ground.getY()-10}
-	// var ballCannonGroup=new Kinetic.Group(); 
+	
 	var ball=new Kinetic.Circle({
 		x:startP.x,
 		y:startP.y,
@@ -102,17 +104,26 @@
         context.stroke();
       }
 
+    var gridLayer = new Kinetic.Layer(); 
+    var gridRect = new Kinetic.Rect({
+    	x:0,y:0,
+    	width:stage.getWidth(),
+    	height:stage.getHeight(),
+    	fill:'transparent'
+    }); 
+
+    var uiLayer = new Kinetic.Layer(); 
+
+    var arrowLayer = new Kinetic.Layer(); 
+
 	layer.add(ball);
-	// layer.add(ground); 
 	groundLayer.add(ground);  
 	stage.add(groundLayer);   
 	stage.add(layer); 
 	stage.add(curveLayer); 
 	stage.add(markerLayer); 
-
-	// drawCurves(); 
-
-
+	stage.add(uiLayer); 
+	stage.add(arrowLayer); 
 </script>
 <br/>
 
@@ -128,18 +139,13 @@
 				<tr><td>Angle</td> <td> <input id = 'angle' value='45' > </td> </tr>
 				<tr><td>Gravity</td> <td> <input id = 'gravity' value='-9.8' > </td> </tr>
 			</table>
-<!-- 			<label>Time:</label><input id='time' /> <br />
-			<label>Initial Velocity </label> <input id='ivelocity' value='0' /> <br />
-			<label>Additional Velocity</label> <input id = 'avelocity' value='50' > <br />
-			<label>Acceleration</label> <input id = 'acceleration' value='0' > <br />
-			<label>Angle</label> <input id = 'angle' value='45' > <br />
-			<label>Gravity</label> <input id = 'gravity' value='-9.8' > <br /> -->
 		</div>
 	</div>
 	<div class='col-lg-6'>
 		<h4>Subheader2</h4>
 		<div>
-<button id='move'>Move</button><button id='stop' >Stop</button><button id='solution'>Solution</button><button id='showpath'>Show Path</button> 
+<button id='move'>Move</button><button id='stop' >Stop</button><button id='solution'>Solution</button><button id='showpath'>Show Path</button>
+<input type='checkbox' checked='checked' > Enable Camera Control
 		</div>
 		<h4>Subheader3</h4>
 		<div>
@@ -151,17 +157,8 @@
 	</div>
 </div>
 </div>
-
-<!-- <button id='move'>Move</button><button id='stop' >Stop</button>   <button id='direct' >Direct</button><button id='solution'>Solution</button> <button id='showpath'>Show Path</button> <button id='bigger'>Bigger</button>
-<button id='rotate'>Rotate</button>  <br />
-<label>Velocity</label>:
-	<div class='well well-sm hoverable'> <label>X </label><input id='velocityx' /><label>Y</label><input id='velocityy' /> </div> </button>
-	<div class='well well-sm hoverable' style='background-color:green' > 
-		 -->
-
 	</div>
- <script src='js/bootstrap.js'></script>
-<script src='js/bootstrap.min.js'></script>
+
 
 <script src='rocket.js'></script>
 <link rel="stylesheet" type="text/css" href="rocket.css">
