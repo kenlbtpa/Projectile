@@ -34,12 +34,8 @@
 		container:'container',
 		width:$('#container').width(),
 		height:300
+	
 	});
-
-	var layer=new Kinetic.Layer(); 
-	var ballLayer=new Kinetic.Layer(); 
-	var groundLayer = new Kinetic.Layer(); 
-	var markerLayer = new Kinetic.Layer(); 
 
 	var ground = new Kinetic.Rect({
 		x:-10,
@@ -48,9 +44,17 @@
 		height:70,
 		fill:'brown',
 		stroke:'2'
-	}); 
+	});
 
 	var startP={x:50,y:ground.getY()-10}
+
+	var layer=new Kinetic.Layer({
+		width:stage.width(),
+		height:ground.y(),
+	}); 
+	var ballLayer=new Kinetic.Layer();  
+	var groundLayer = new Kinetic.Layer(); 
+	var markerLayer = new Kinetic.Layer(); 
 	
 	var ball=new Kinetic.Circle({
 		x:startP.x,
@@ -114,7 +118,7 @@
 
     var uiLayer = new Kinetic.Layer(); 
 
-    var arrowLayer = new Kinetic.Layer(); 
+    var arrowLayer = new Kinetic.Layer({opacity:0}); 
 
 	layer.add(ball);
 	groundLayer.add(ground);  

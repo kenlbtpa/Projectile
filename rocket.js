@@ -272,20 +272,22 @@ var ui = {
 	zoomAdjust: function(event)
 	{
 
-		var perspective = {stage.getWidth()/2, y:ground.getY()}; 
+		var perspective = {x: stage.getWidth()/2, y:ground.getY()}; 
 
 		var newScale = ui.zoom;  
-		layer.scale({x:newScale,y:newScale}); 
-		layer.offsetX( -(ball.getX()/newScale - ball.getX()) ); 
-		layer.offsetY( -(ball.getY()/newScale - ball.getY()) ); 
+		// layer.scale({x:newScale,y:newScale}); 
+		// layer.offsetX( -(perspective.x/newScale - perspective.x) ); 
+		// layer.offsetX( -(perspective.y/newScale - perspective.y) ); 
+		// layer.offsetX( -(ball.getX()/newScale - ball.getX()) ); 
+		// layer.offsetY( -(ball.getY()/newScale - ball.getY()) ); 
 		layer.draw(); 
 
-		quadLine.scale({x:newScale,y:newScale})
-		var x1 = quadLine.points()[0]
-		var y1 = quadLine.points()[1]
+		// quadLine.scale({x:newScale,y:newScale})
+		// var x1 = quadLine.points()[0]
+		// var y1 = quadLine.points()[1]
 
-		quadLine.offsetX( -(x1/newScale - x1) ); 
-		quadLine.offsetY( -(y1/newScale - y1) ); 
+		// quadLine.offsetX( -(perspective.x/newScale - perspective.x) ); 
+		// quadLine.offsetY( -(perspective.y/newScale - perspective.y) ); 
 
 		// markerLayer.scale({x:.5,y:.5})
 		// // var x1 = quadLine.points()[0]
@@ -301,6 +303,28 @@ var ui = {
 var cameraControl = true; 
 $('#container').on('mousewheel', function(event){
 	if(cameraControl){
+
+// 		console.log(layer.height())
+// return;
+		var evt = event.originalEvent; 
+		var zoom = ( ui.zoom - ( evt.wheelDelta/120 < 0 ? 0.05 : -0.05) ); 
+		ui.zoom = zoom; 
+		var newScale = ui.zoom * zoom; 
+		layer.scale({x:newScale,y:newScale}); 
+		curveLayer.scale({x:newScale,y:newScale});
+
+
+		var offset = {x: 0, y: -(ground.y()-(layer.height()*newScale))/newScale }
+			// }; 
+		console.log(offset); 
+
+		layer.offset(offset)
+		curveLayer.offset(offset)
+		// layer.offsetX(  )
+		// curveLayer.offsetX(  )
+		layer.draw(); 
+		curveLayer.draw();
+		return;
 		ui.mouseWheelZoom(event); 
 		ui.zoomAdjust(event); 
 	}
@@ -477,3 +501,5 @@ console.log( pointerLine.points() )
 arrowLayer.add(pointerLine);
 arrowLayer.add(circleController)
 arrowLayer.draw();  
+
+ui.zoom = 1; 
