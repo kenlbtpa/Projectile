@@ -7,6 +7,10 @@ $('#velocityy').val(velocity.y);
 $('#velocityx').change( function() { velocity.x = $('#velocityx').val(); });
 $('#velocityy').change( function() { velocity.y = $('#velocityy').val(); });
 
+var dragOn = false; 
+var previousEvent = null; 
+var originOffset = {x:0,y:0}
+
 var startTime = new Date().getTime(); 
 var animTimeStart; 
 var animTime; 
@@ -379,6 +383,10 @@ function zoomLayers(newScale)
 		x: -((stage.width()-(layer.width()*newScale))/10 )/newScale, 
 		y: -(ground.y()-(layer.height()*newScale))/newScale }
 
+	/*Additional Modifications of Offset in case of mouse moves.*/
+		offset.x -= originOffset.x
+		offset.y -= originOffset.y
+	/*EOF Additional Modifications of Offset in case of mouse moves.*/
 	layer.offset(offset)
 	curveLayer.offset(offset)
 	markerLayer.offset(offset)
@@ -416,7 +424,37 @@ $('#rotate').click(function(){
 	layer.draw(); 
 })
 
+
+$('#container').mousedown(function()
+{
+	dragOn = true;
+})
+$('body').mouseup(function(){
+	dragOn = false;
+	previousEvent=null; 
+})
+
 $('#container').mousemove(function(e){
+	if(!dragOn)return;
+	if(previousEvent==null)
+	{
+		previousEvent = e; 
+		return;
+	}
+	console.log(layer.offset())
+
+	originOffset = {x: e.pageX - previousEvent.pageX , y: e.pageY - previousEvent.pageY}
+	var adjust = {x:layer.offset().x-originOffset.x, y:layer.offset().y-originOffset.y}; 
+	layer.offset(adjust);
+	curveLayer.offset(adjust);
+	markerLayer.offset(adjust); 
+	groundLayer.offset({x:groundLayer.offset().x-originOffset.x, y:groundLayer.offset().y-originOffset.y}); 
+
+	previousEvent = e; 
+	layer.draw(); 
+	curveLayer.draw(); 
+	markerLayer.draw(); 
+	groundLayer.draw(); 
 	return;
 	x0=ball.getX(); 
 	y0=ball.getY(); 

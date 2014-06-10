@@ -38,10 +38,10 @@
 	});
 
 	var ground = new Kinetic.Rect({
-		x:-10,
+		x:-10000,
 		y:stage.getHeight()-50, 
-		width:stage.getWidth()+20,
-		height:70,
+		width:100000,
+		height:1000000,
 		fill:'brown',
 		stroke:'2'
 	});
@@ -129,16 +129,11 @@
 	layer.add(ball);
 	groundLayer.add(ground);  
 	
-	var movableGroup = new Kinetic.Group({draggable:true}); 
-	movableGroup.add(layer); 
-	movableGroup.add(curveLayer); 
-	movableGroup.add(markerLayer); 
 	stage.add(groundLayer);   
-	// stage.add(layer); 
-	// stage.add(curveLayer); 
-	// stage.add(markerLayer); 
-	// stage.add(arrowLayer); 
-	stage.add(movableGroup); 
+	stage.add(layer); 
+	stage.add(curveLayer); 
+	stage.add(markerLayer); 
+	stage.add(arrowLayer); 
 
 	stage.add(uiLayer); 
 </script>
