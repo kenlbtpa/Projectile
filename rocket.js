@@ -119,9 +119,41 @@ function showPath()
 		id:'topMarker'
 		})
 
-		topPointCircle.on('click',function(evt){
-			console.log("Top Circle Clicked")
+		/*Tooltip Code*/
+		var topPointTip = new Opentip(
+			"#container",
+			"<hr style='margin-top:5px;margin-bottom:15px;'/><div class='explaintrigger smalltip minimized'>Explanation</div>",
+			{
+				// escapeContent:true,
+				style: "dark",
+				showOn: null,
+				hideTrigger:'closeButton',
+				target:null
+			}
+		); 
+
+		var topPointTipContent = "Projectile landed at " + (topPointCircle.x() - ball.x()) + " units away from initial position."; 
+		var explainationTip = "<div class='hidden-explaintip'>Here is the math.<br/>asdf<br/>asdf\n\nasdf</div>"; 
+		topPointTip.content = 
+			topPointTipContent + topPointTip.content + "<hr style='margin-top:20px;margin-bottom:15px;'/>"
+		topPointTip.hide(); 
+
+		topPointCircle.on('click',function(){
+			topPointTip.show(); 
+			var tipDisplayPosition=
+			{
+			 left:$('#opentip-1').position().left,
+			 top:$('#opentip-1').position().top
+			}		 
+
+			$('.explaintrigger').click(function(){
+				topPointTip.setContent(topPointTip.content + explainationTip); 
+				$('#opentip-1').offset(tipDisplayPosition)
+				// $(this).parent().parent().offset(tipDisplayPosition)
+			}); 
+
 		}); 
+		/*EOF Tooltip Code*/
 
 		markerLayer.add(topPointCircle); 
 
@@ -144,39 +176,76 @@ function showPath()
 		id:'finalMarker'
 		})
 
-		// var minimizedTip = "<div class='explaintrigger smalltip minimized'>Explanation</div>"; 
-		// var explainationTip = "<div class='explaintip'>Explaination</div>"; 
-		// var tooltip = new Opentip(
-		// 	"#container",
-		// 	"Tooltip is Working<hr style='margin-top:5px;margin-bottom:15px;'/>"+minimizedTip+explainationTip , 
-		// 	{
-		// 		// escapeContent:true,
-		// 		style: "glass",
-		// 		showOn: null,
-		// 		hideTrigger:'closeButton'
-		// 	}
-		// ); 
+		/*Tooltip Code*/
+		var finalPointTip = new Opentip(
+			"#container",
+			"<hr style='margin-top:5px;margin-bottom:15px;'/><div class='explaintrigger smalltip minimized'>Explanation</div>",
+			{
+				// escapeContent:true,
+				style: "dark",
+				showOn: null,
+				hideTrigger:'closeButton',
+				target:null
+			}
+		); 
 
-		// tooltip.hide(); 
+		var finalPointTipContent = "Projectile landed at " + (finalPointCircle.x() - ball.x()) + " units away from initial position."; 
+		var explainationTip = "<div class='hidden-explaintip'>Here is the math.<br/>asdf<br/>asdf\n\nasdf</div>"; 
+		finalPointTip.content = 
+			finalPointTipContent + finalPointTip.content + "<hr style='margin-top:20px;margin-bottom:15px;'/>"
+		finalPointTip.hide(); 
 
-		// finalPointCircle.on('click',function(){
-		// 	tooltip.content = "Well Hello is Tooltip Working? Top"
-		// 	tooltip.show(); 
-		// }); 
+		finalPointCircle.on('click',function(){
+			finalPointTip.show(); 
+			// console.log($('#opentip-1'))
+			var tipDisplayPosition=
+			{
+			 left:$('#opentip-2').position().left,
+			 top:$('#opentip-2').position().top
+			}		 
 
-		// finalPointCircle.on('mouseout',function(){
-		// 	tooltip.content = "Well Hello is Tooltip Working?"
-		// 	tooltip.hide();
-		// }); 
+			$('.explaintrigger').click(function(){
+				finalPointTip.setContent(finalPointTip.content + explainationTip); 
+				$('#opentip-2').offset(tipDisplayPosition)
+				// $(this).parent().parent().offset(tipDisplayPosition)
+			}); 
 
-		// $('#container').click(function(){
-		// 	tooltip.show(); 
-		// 	$('.explaintrigger').click(function(){
-		// 		this.innerHTML = "Explaination\nWAHAHA\nMoreWords"; 	
-		// 	})
-		// })
+		}); 
+		/*EOF Tooltip Code*/
+
 		markerLayer.add(finalPointCircle); 
 	}
+
+	  // dash:[10,10],
+	  // strokeWidth: 3,
+	  // stroke: 'black',
+	  // lineCap: 'round',
+	  // id: 'quadLine',
+	  // opacity: 0.3
+
+	var topMarkerLine = new Kinetic.Line({
+		dash:[10,10],
+		strokeWidth:2,
+		stroke:'gray',
+		lineCap:'round',
+		opacity:0.6,
+		points:[ topPointCircle.x() , topPointCircle.y(), topPointCircle.x(), ground.y() ]
+	});
+
+	var finalMarkerLine = new Kinetic.Line({
+		dash:[10,10],
+		strokeWidth:2,
+		stroke:'gray',
+		lineCap:'round',
+		opacity:0.6,
+		points:[ finalPointCircle.x() , finalPointCircle.y(), finalPointCircle.x(), ground.y() ]		
+	})
+
+	markerLayer.add(topMarkerLine); 
+	markerLayer.add(finalMarkerLine); 
+
+	topMarkerLine.moveToBottom(); 
+	finalMarkerLine.moveToBottom(); 
 
 	markerLayer.draw(); 
 
@@ -256,6 +325,7 @@ $('#showpath').click(function(){
 var ui = {
 	zoom: 1.0, 
 	scale: 1,
+	offset:{left:0,top:0},
 	mouseWheelZoom: function(event){
 		event.preventDefault(); 
 		var evt = event.originalEvent; 
@@ -300,30 +370,34 @@ var ui = {
 	}
 }
 
+function zoomLayers(newScale)
+{
+	layer.scale({x:newScale,y:newScale}); 
+	curveLayer.scale({x:newScale,y:newScale});
+	markerLayer.scale({x:newScale,y:newScale})
+	var offset = {
+		x: -((stage.width()-(layer.width()*newScale))/10 )/newScale, 
+		y: -(ground.y()-(layer.height()*newScale))/newScale }
+
+	layer.offset(offset)
+	curveLayer.offset(offset)
+	markerLayer.offset(offset)
+	layer.draw(); 
+	curveLayer.draw();
+	markerLayer.draw();
+}
+
 var cameraControl = true; 
 $('#container').on('mousewheel', function(event){
 	if(cameraControl){
 
-// 		console.log(layer.height())
+// 		console.log(layer.width(),stage.width(),layer.width()*newScale)
 // return;
 		var evt = event.originalEvent; 
 		var zoom = ( ui.zoom - ( evt.wheelDelta/120 < 0 ? 0.05 : -0.05) ); 
 		ui.zoom = zoom; 
 		var newScale = ui.zoom * zoom; 
-		layer.scale({x:newScale,y:newScale}); 
-		curveLayer.scale({x:newScale,y:newScale});
-
-
-		var offset = {x: 0, y: -(ground.y()-(layer.height()*newScale))/newScale }
-			// }; 
-		console.log(offset); 
-
-		layer.offset(offset)
-		curveLayer.offset(offset)
-		// layer.offsetX(  )
-		// curveLayer.offsetX(  )
-		layer.draw(); 
-		curveLayer.draw();
+		zoomLayers(newScale)
 		return;
 		ui.mouseWheelZoom(event); 
 		ui.zoomAdjust(event); 

@@ -54,7 +54,10 @@
 	}); 
 	var ballLayer=new Kinetic.Layer();  
 	var groundLayer = new Kinetic.Layer(); 
-	var markerLayer = new Kinetic.Layer(); 
+	var markerLayer = new Kinetic.Layer({
+		width:stage.width(),
+		height:ground.y(),
+	}); 
 	
 	var ball=new Kinetic.Circle({
 		x:startP.x,
@@ -93,7 +96,10 @@
 	  opacity: 0.3
 	});
 
-	var curveLayer = new Kinetic.Layer(); 
+	var curveLayer = new Kinetic.Layer({
+		width:stage.width(),
+		height:ground.y(),
+	}); 
 
 	function drawCurves() {
         var context = curveLayer.getContext();
@@ -122,12 +128,19 @@
 
 	layer.add(ball);
 	groundLayer.add(ground);  
+	
+	var movableGroup = new Kinetic.Group({draggable:true}); 
+	movableGroup.add(layer); 
+	movableGroup.add(curveLayer); 
+	movableGroup.add(markerLayer); 
 	stage.add(groundLayer);   
-	stage.add(layer); 
-	stage.add(curveLayer); 
-	stage.add(markerLayer); 
+	// stage.add(layer); 
+	// stage.add(curveLayer); 
+	// stage.add(markerLayer); 
+	// stage.add(arrowLayer); 
+	stage.add(movableGroup); 
+
 	stage.add(uiLayer); 
-	stage.add(arrowLayer); 
 </script>
 <br/>
 
@@ -138,7 +151,7 @@
 		<div>
 			<table border='0' >
 				<tr><td>Time</td> <td> <input id='time' > </td> </tr>
-				<tr><td>Additional Velocity</td> <td> <input id = 'avelocity' value='100' > </td> </tr>
+				<tr><td>Additional Velocity</td> <td> <input id = 'avelocity' value='50' > </td> </tr>
 				<tr><td>Acceleration</td> <td> <input id = 'acceleration' value='0' > </td> </tr>
 				<tr><td>Angle</td> <td> <input id = 'angle' value='45' > </td> </tr>
 				<tr><td>Gravity</td> <td> <input id = 'gravity' value='-9.8' > </td> </tr>
