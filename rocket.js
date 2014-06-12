@@ -17,8 +17,6 @@ var animTime;
 var storeTime = 0; 
 var stopTimeElapsed = false; 
 
-
-
 $('#move').click(function(){
 	stopTimeElapsed = false;
 	animTimeStart = new Date().getTime(); 
@@ -32,12 +30,20 @@ $('#stop').click(function(){
 	storeTime = timeElapsed; 
 	anim.stop(); 
 })
+		 
+function restrictGroundAndBackground()
+{
+	if(ground.x() < -1000000) {ground.x(-1000000); }
+	if(ground.width() > 2000000) {ground.width(2000000); }
+	if(ground.height() > 2000000) {ground.height(2000000); }
+
+	if(background.x() < -1000000) {background.x(-1000000); }
+	if(background.width() > 2000000) {background.width(2000000); }
+	if(background.height() > 2000000) {background.height(2000000); }
+}
 
 function animate(frame)
 {
-
-	// console.log(ui.zoom)
-
 	animTime =  new Date().getTime() - animTimeStart; 
 
 	var iVelocity = Number($('#ivelocity').val()); 
@@ -56,15 +62,19 @@ function animate(frame)
 	$('#time').val( timeElapsed / 700 )
 	var deltaY = ( ( yTravelRate* (timeElapsed / 700) ) + ( 0.5 * ( acceleration + gravity ) * Math.pow(timeElapsed/700, 2) ) ); 
 	ball.setY( (startP.y - deltaY) ); 
-	
-	if(ball.getY() >= (stage.getHeight() - ground.getHeight() + ball.getRadius()) ) 
+
+	/*Prevents the Ball from going below the ground. */
+	if(ball.getY() >= (ground.y() - ball.getRadius()) ) 
 	{ 
-		ball.setY( (stage.getHeight() - ground.getHeight() + ball.getRadius()) ); 
+		ball.setY( (ground.y() - ball.getRadius()) ); 
 		stopTimeElapsed = true;
 		timeElapsed = ( yTravelRate / (-0.5 * ( gravity )) ) * 700 ; 
+		anim.stop(); 
 	}
 	var deltaX = ( xTravelRate * (timeElapsed / 700) ) + ( 0.5 * acceleration * Math.pow(timeElapsed / 700, 2) )
 	ball.setX( (startP.x + deltaX) 	); 		
+
+	// console.log(ball.x(),ball.y())
 } 
 
 function showPath()
@@ -92,8 +102,8 @@ function showPath()
 		points.push( xValueAt, yValueAt ); 
 	}
 	quadLine.points( points ); 
-	curveLayer.add(quadLine)
-	curveLayer.draw(); 
+	mainGroup.add(quadLine); 
+	mainLayer.draw(); 
 
 	var topPointTime = (-1*yTravelRate)/(acceleration+gravity); 
 	var topPoint = {
@@ -106,9 +116,9 @@ function showPath()
 		y:startP.y - ( (yTravelRate * timeElapsed ) + (0.5 * (acceleration + gravity) * Math.pow(timeElapsed,2) ) )
 	}
 
-	if(markerLayer.find('#topMarker').length != 0)
+	if(mainGroup.find('#topMarker').length != 0)
 	{
-		var topMarker = markerLayer.find('#topMarker')[0]
+		var topMarker = mainGroup.find('#topMarker')[0]
 		topMarker.setX( topPoint.x );
 		topMarker.setY( topPoint.y ); 
 	}
@@ -159,13 +169,13 @@ function showPath()
 		}); 
 		/*EOF Tooltip Code*/
 
-		markerLayer.add(topPointCircle); 
+		mainGroup.add(topPointCircle); 
 
 	}
 
-	if(markerLayer.find('#finalMarker').length != 0)
+	if(mainGroup.find('#finalMarker').length != 0)
 	{
-		var topMarker = markerLayer.find('#finalMarker')[0]
+		var topMarker = mainGroup.find('#finalMarker')[0]
 		finalMarker.setX( topPoint.x );
 		finalMarker.setY( topPoint.y ); 
 	}
@@ -217,7 +227,7 @@ function showPath()
 		}); 
 		/*EOF Tooltip Code*/
 
-		markerLayer.add(finalPointCircle); 
+		mainGroup.add(finalPointCircle); 
 	}
 
 	  // dash:[10,10],
@@ -245,18 +255,18 @@ function showPath()
 		points:[ finalPointCircle.x() , finalPointCircle.y(), finalPointCircle.x(), ground.y() ]		
 	})
 
-	markerLayer.add(topMarkerLine); 
-	markerLayer.add(finalMarkerLine); 
+	mainGroup.add(topMarkerLine); 
+	mainGroup.add(finalMarkerLine); 
 
 	topMarkerLine.moveToBottom(); 
 	finalMarkerLine.moveToBottom(); 
 
-	markerLayer.draw(); 
+	mainGroup.draw(); 
 
 	return { x:finalPoint.x, y:topPoint.y }
 }
 
-var anim = new Kinetic.Animation(animate,layer); 
+var anim = new Kinetic.Animation(animate,mainLayer); 
 
 $('#direct').click(function(){
 
@@ -376,23 +386,56 @@ var ui = {
 
 function zoomLayers(newScale)
 {
-	layer.scale({x:newScale,y:newScale}); 
-	curveLayer.scale({x:newScale,y:newScale});
-	markerLayer.scale({x:newScale,y:newScale})
-	var offset = {
-		x: -((stage.width()-(layer.width()*newScale))/10 )/newScale, 
-		y: -(ground.y()-(layer.height()*newScale))/newScale }
+	mainGroup.scale({x:newScale,y:newScale}); 
+	if(newScale<1)
+	{
+		var workingWidth = (baseGroundProp.width + modGroundProp.width) 
+		// var currentWidth = ( workingWidth-ground.x())/newScale
+		// // var bonus = currentWidth-workingWidth 
+		// // // console.log( workingWidth, bonus, newScale)
+		var bonus = ((workingWidth)/newScale)-(workingWidth); 
+		// console.log(newScale, bonus); 
 
-	/*Additional Modifications of Offset in case of mouse moves.*/
-		offset.x -= originOffset.x
-		offset.y -= originOffset.y
-	/*EOF Additional Modifications of Offset in case of mouse moves.*/
-	layer.offset(offset)
-	curveLayer.offset(offset)
-	markerLayer.offset(offset)
-	layer.draw(); 
-	curveLayer.draw();
-	markerLayer.draw();
+		var newGroundX = (baseGroundProp.x+modGroundProp.x) - (bonus/2); 
+		var newGroundWidth = workingWidth + bonus; 
+		var newGroundHeight = (baseGroundProp.height + modGroundProp.height)/newScale; 
+		ground.x(newGroundX); 
+		ground.width(newGroundWidth); 
+		ground.height(newGroundHeight); 
+		background.x(newGroundX); 
+		background.width(newGroundWidth); 
+		background.height(newGroundHeight); 
+		restrictGroundAndBackground(); 
+
+		// var limits = {min:-600000,max:1200000}
+
+		// console.log(ground.x(), ground.width(), ground.height())
+
+		// console.log(newScale , ground.x(), ground.width() , ground.height() )		
+		// if( ground.x() < -3000000  ) {ground.x(-3000000);restrictZoom=true;console.log("limit1");}
+		// if( ground.width() > 9000000 ) {ground.width(9000000);restrictZoom=true;console.log("limit2");}
+		// if( ground.height() > 9000000  ) {ground.height(9000000);restrictZoom=true;console.log("limit3");}		
+	}
+
+	
+	// layer.scale({x:newScale,y:newScale}); 
+	// curveLayer.scale({x:newScale,y:newScale});
+	// markerLayer.scale({x:newScale,y:newScale})
+	// var offset = {
+	// 	x: -((stage.width()-(layer.width()*newScale))/10 )/newScale, 
+	// 	y: -(ground.y()-(layer.height()*newScale))/newScale }
+
+	// Additional Modifications of Offset in case of mouse moves.
+	// 	offset.x -= originOffset.x
+	// 	offset.y -= originOffset.y
+	// /*EOF Additional Modifications of Offset in case of mouse moves.*/
+	// layer.offset(offset)
+	// curveLayer.offset(offset)
+	// markerLayer.offset(offset)
+	// layer.draw(); 
+	// curveLayer.draw();
+	// markerLayer.draw();
+	mainLayer.draw() ;
 }
 
 var cameraControl = true; 
@@ -404,8 +447,8 @@ $('#container').on('mousewheel', function(event){
 		var evt = event.originalEvent; 
 		var zoom = ( ui.zoom - ( evt.wheelDelta/120 < 0 ? 0.05 : -0.05) ); 
 		ui.zoom = zoom; 
-		var newScale = ui.zoom * zoom; 
-		zoomLayers(newScale)
+		if(ui.zoom<.01) {ui.zoom=.01;}
+		zoomLayers(ui.zoom)
 		return;
 		ui.mouseWheelZoom(event); 
 		ui.zoomAdjust(event); 
@@ -435,14 +478,13 @@ $('body').mouseup(function(){
 })
 
 $('#container').mousemove(function(e){
+	return;
 	if(!dragOn)return;
 	if(previousEvent==null)
 	{
 		previousEvent = e; 
 		return;
 	}
-	console.log(layer.offset())
-
 	originOffset = {x: e.pageX - previousEvent.pageX , y: e.pageY - previousEvent.pageY}
 	var adjust = {x:layer.offset().x-originOffset.x, y:layer.offset().y-originOffset.y}; 
 	layer.offset(adjust);
@@ -590,7 +632,7 @@ $('#angle').change(function(){
 	circleController.x( pointerPosition.x ); 
 	circleController.y( pointerPosition.y ); 
 	pointerLine.points( [ pointerLine.points()[0], pointerLine.points()[1], circleController.getX(), circleController.getY() ] ); 
-	arrowLayer.draw(); 
+	mainLayer.draw(); 
 	showPath(); 
 }); 
 
@@ -603,15 +645,15 @@ $('#avelocity').change(function(){
 	circleController.x( pointerPosition.x ); 
 	circleController.y( pointerPosition.y ); 
 	pointerLine.points( [ pointerLine.points()[0], pointerLine.points()[1], circleController.getX(), circleController.getY() ] ); 
-	arrowLayer.draw(); 
+	mainLayer.draw(); 
 	showPath(); 
 })
 
 // triangle.rotate( Math.atan2( deltaX,deltaY ) * (180/Math.PI) )
 
-console.log( pointerLine.points() )
-arrowLayer.add(pointerLine);
-arrowLayer.add(circleController)
-arrowLayer.draw();  
+// console.log( pointerLine.points() )
+// mainGroup.add(pointerLine);
+// mainGroup.add(circleController)
+// mainGroup.draw();  
 
 ui.zoom = 1; 
