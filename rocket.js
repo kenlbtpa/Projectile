@@ -7,13 +7,15 @@ $('#velocityy').val(velocity.y);
 $('#velocityx').change( function() { velocity.x = $('#velocityx').val(); });
 $('#velocityy').change( function() { velocity.y = $('#velocityy').val(); });
 
+var dragOn = false; 
+var previousEvent = null; 
+var originOffset = {x:0,y:0}
+
 var startTime = new Date().getTime(); 
 var animTimeStart; 
 var animTime; 
 var storeTime = 0; 
 var stopTimeElapsed = false; 
-
-
 
 $('#move').click(function(){
 	stopTimeElapsed = false;
@@ -28,12 +30,20 @@ $('#stop').click(function(){
 	storeTime = timeElapsed; 
 	anim.stop(); 
 })
+		 
+function restrictGroundAndBackground()
+{
+	if(ground.x() < -1000000) {ground.x(-1000000); }
+	if(ground.width() > 2000000) {ground.width(2000000); }
+	if(ground.height() > 2000000) {ground.height(2000000); }
+
+	if(background.x() < -1000000) {background.x(-1000000); }
+	if(background.width() > 2000000) {background.width(2000000); }
+	if(background.height() > 2000000) {background.height(2000000); }
+}
 
 function animate(frame)
 {
-
-	// console.log(ui.zoom)
-
 	animTime =  new Date().getTime() - animTimeStart; 
 
 	var iVelocity = Number($('#ivelocity').val()); 
@@ -52,15 +62,19 @@ function animate(frame)
 	$('#time').val( timeElapsed / 700 )
 	var deltaY = ( ( yTravelRate* (timeElapsed / 700) ) + ( 0.5 * ( acceleration + gravity ) * Math.pow(timeElapsed/700, 2) ) ); 
 	ball.setY( (startP.y - deltaY) ); 
-	
-	if(ball.getY() >= (stage.getHeight() - ground.getHeight() + ball.getRadius()) ) 
+
+	/*Prevents the Ball from going below the ground. */
+	if(ball.getY() >= (ground.y() - ball.getRadius()) ) 
 	{ 
-		ball.setY( (stage.getHeight() - ground.getHeight() + ball.getRadius()) ); 
+		ball.setY( (ground.y() - ball.getRadius()) ); 
 		stopTimeElapsed = true;
 		timeElapsed = ( yTravelRate / (-0.5 * ( gravity )) ) * 700 ; 
+		anim.stop(); 
 	}
 	var deltaX = ( xTravelRate * (timeElapsed / 700) ) + ( 0.5 * acceleration * Math.pow(timeElapsed / 700, 2) )
 	ball.setX( (startP.x + deltaX) 	); 		
+
+	// console.log(ball.x(),ball.y())
 } 
 
 function showPath()
@@ -88,8 +102,8 @@ function showPath()
 		points.push( xValueAt, yValueAt ); 
 	}
 	quadLine.points( points ); 
-	curveLayer.add(quadLine)
-	curveLayer.draw(); 
+	mainGroup.add(quadLine); 
+	mainLayer.draw(); 
 
 	var topPointTime = (-1*yTravelRate)/(acceleration+gravity); 
 	var topPoint = {
@@ -102,9 +116,9 @@ function showPath()
 		y:startP.y - ( (yTravelRate * timeElapsed ) + (0.5 * (acceleration + gravity) * Math.pow(timeElapsed,2) ) )
 	}
 
-	if(markerLayer.find('#topMarker').length != 0)
+	if(mainGroup.find('#topMarker').length != 0)
 	{
-		var topMarker = markerLayer.find('#topMarker')[0]
+		var topMarker = mainGroup.find('#topMarker')[0]
 		topMarker.setX( topPoint.x );
 		topMarker.setY( topPoint.y ); 
 	}
@@ -119,17 +133,49 @@ function showPath()
 		id:'topMarker'
 		})
 
-		topPointCircle.on('click',function(evt){
-			console.log("Top Circle Clicked")
-		}); 
+		/*Tooltip Code*/
+		var topPointTip = new Opentip(
+			"#container",
+			"<hr style='margin-top:5px;margin-bottom:15px;'/><div class='explaintrigger smalltip minimized'>Explanation</div>",
+			{
+				// escapeContent:true,
+				style: "dark",
+				showOn: null,
+				hideTrigger:'closeButton',
+				target:null
+			}
+		); 
 
-		markerLayer.add(topPointCircle); 
+		var topPointTipContent = "Projectile landed at " + (topPointCircle.x() - ball.x()) + " units away from initial position."; 
+		var explainationTip = "<div class='hidden-explaintip'>Here is the math.<br/>asdf<br/>asdf\n\nasdf</div>"; 
+		topPointTip.content = 
+			topPointTipContent + topPointTip.content + "<hr style='margin-top:20px;margin-bottom:15px;'/>"
+		topPointTip.hide(); 
+
+		topPointCircle.on('click',function(){
+			topPointTip.show(); 
+			var tipDisplayPosition=
+			{
+			 left:$('#opentip-1').position().left,
+			 top:$('#opentip-1').position().top
+			}		 
+
+			$('.explaintrigger').click(function(){
+				topPointTip.setContent(topPointTip.content + explainationTip); 
+				$('#opentip-1').offset(tipDisplayPosition)
+				// $(this).parent().parent().offset(tipDisplayPosition)
+			}); 
+
+		}); 
+		/*EOF Tooltip Code*/
+
+		mainGroup.add(topPointCircle); 
 
 	}
 
-	if(markerLayer.find('#finalMarker').length != 0)
+	if(mainGroup.find('#finalMarker').length != 0)
 	{
-		var topMarker = markerLayer.find('#finalMarker')[0]
+		var topMarker = mainGroup.find('#finalMarker')[0]
 		finalMarker.setX( topPoint.x );
 		finalMarker.setY( topPoint.y ); 
 	}
@@ -144,46 +190,76 @@ function showPath()
 		id:'finalMarker'
 		})
 
-		// var minimizedTip = "<div class='explaintrigger smalltip minimized'>Explanation</div>"; 
-		// var explainationTip = "<div class='explaintip'>Explaination</div>"; 
-		// var tooltip = new Opentip(
-		// 	"#container",
-		// 	"Tooltip is Working<hr style='margin-top:5px;margin-bottom:15px;'/>"+minimizedTip+explainationTip , 
-		// 	{
-		// 		// escapeContent:true,
-		// 		style: "glass",
-		// 		showOn: null,
-		// 		hideTrigger:'closeButton'
-		// 	}
-		// ); 
+		/*Tooltip Code*/
+		var finalPointTip = new Opentip(
+			"#container",
+			"<hr style='margin-top:5px;margin-bottom:15px;'/><div class='explaintrigger smalltip minimized'>Explanation</div>",
+			{
+				// escapeContent:true,
+				style: "dark",
+				showOn: null,
+				hideTrigger:'closeButton',
+				target:null
+			}
+		); 
 
-		// tooltip.hide(); 
+		var finalPointTipContent = "Projectile landed at " + (finalPointCircle.x() - ball.x()) + " units away from initial position."; 
+		var explainationTip = "<div class='hidden-explaintip'>Here is the math.<br/>asdf<br/>asdf\n\nasdf</div>"; 
+		finalPointTip.content = 
+			finalPointTipContent + finalPointTip.content + "<hr style='margin-top:20px;margin-bottom:15px;'/>"
+		finalPointTip.hide(); 
 
-		// finalPointCircle.on('click',function(){
-		// 	tooltip.content = "Well Hello is Tooltip Working? Top"
-		// 	tooltip.show(); 
-		// }); 
+		finalPointCircle.on('click',function(){
+			finalPointTip.show(); 
+			// console.log($('#opentip-1'))
+			var tipDisplayPosition=
+			{
+			 left:$('#opentip-2').position().left,
+			 top:$('#opentip-2').position().top
+			}		 
 
-		// finalPointCircle.on('mouseout',function(){
-		// 	tooltip.content = "Well Hello is Tooltip Working?"
-		// 	tooltip.hide();
-		// }); 
+			$('.explaintrigger').click(function(){
+				finalPointTip.setContent(finalPointTip.content + explainationTip); 
+				$('#opentip-2').offset(tipDisplayPosition)
+				// $(this).parent().parent().offset(tipDisplayPosition)
+			}); 
 
-		// $('#container').click(function(){
-		// 	tooltip.show(); 
-		// 	$('.explaintrigger').click(function(){
-		// 		this.innerHTML = "Explaination\nWAHAHA\nMoreWords"; 	
-		// 	})
-		// })
-		markerLayer.add(finalPointCircle); 
+		}); 
+		/*EOF Tooltip Code*/
+
+		mainGroup.add(finalPointCircle); 
 	}
 
-	markerLayer.draw(); 
+	var topMarkerLine = new Kinetic.Line({
+		dash:[10,10],
+		strokeWidth:2,
+		stroke:'gray',
+		lineCap:'round',
+		opacity:0.6,
+		points:[ topPointCircle.x() , topPointCircle.y(), topPointCircle.x(), ground.y() ]
+	});
+
+	var finalMarkerLine = new Kinetic.Line({
+		dash:[10,10],
+		strokeWidth:2,
+		stroke:'gray',
+		lineCap:'round',
+		opacity:0.6,
+		points:[ finalPointCircle.x() , finalPointCircle.y(), finalPointCircle.x(), ground.y() ]		
+	})
+
+	mainGroup.add(topMarkerLine); 
+	mainGroup.add(finalMarkerLine); 
+
+	topMarkerLine.moveToBottom(); 
+	finalMarkerLine.moveToBottom(); 
+
+	mainGroup.draw(); 
 
 	return { x:finalPoint.x, y:topPoint.y }
 }
 
-var anim = new Kinetic.Animation(animate,layer); 
+var anim = new Kinetic.Animation(animate,mainLayer); 
 
 $('#direct').click(function(){
 
@@ -256,6 +332,7 @@ $('#showpath').click(function(){
 var ui = {
 	zoom: 1.0, 
 	scale: 1,
+	offset:{left:0,top:0},
 	mouseWheelZoom: function(event){
 		event.preventDefault(); 
 		var evt = event.originalEvent; 
@@ -300,30 +377,71 @@ var ui = {
 	}
 }
 
+function zoomLayers(newScale)
+{
+	mainGroup.scale({x:newScale,y:newScale}); 
+	if(newScale<1)
+	{
+		var workingWidth = (baseGroundProp.width + modGroundProp.width) 
+		// var currentWidth = ( workingWidth-ground.x())/newScale
+		// // var bonus = currentWidth-workingWidth 
+		// // // console.log( workingWidth, bonus, newScale)
+		var bonus = ((workingWidth)/newScale)-(workingWidth); 
+		// console.log(newScale, bonus); 
+
+		var newGroundX = (baseGroundProp.x+modGroundProp.x) - (bonus/2); 
+		var newGroundWidth = workingWidth + bonus; 
+		var newGroundHeight = (baseGroundProp.height + modGroundProp.height)/newScale; 
+		ground.x(newGroundX); 
+		ground.width(newGroundWidth); 
+		ground.height(newGroundHeight); 
+		background.x(newGroundX); 
+		background.width(newGroundWidth); 
+		background.height(newGroundHeight); 
+		restrictGroundAndBackground(); 
+
+		// var limits = {min:-600000,max:1200000}
+
+		// console.log(ground.x(), ground.width(), ground.height())
+
+		// console.log(newScale , ground.x(), ground.width() , ground.height() )		
+		// if( ground.x() < -3000000  ) {ground.x(-3000000);restrictZoom=true;console.log("limit1");}
+		// if( ground.width() > 9000000 ) {ground.width(9000000);restrictZoom=true;console.log("limit2");}
+		// if( ground.height() > 9000000  ) {ground.height(9000000);restrictZoom=true;console.log("limit3");}		
+	}
+
+	
+	// layer.scale({x:newScale,y:newScale}); 
+	// curveLayer.scale({x:newScale,y:newScale});
+	// markerLayer.scale({x:newScale,y:newScale})
+	// var offset = {
+	// 	x: -((stage.width()-(layer.width()*newScale))/10 )/newScale, 
+	// 	y: -(ground.y()-(layer.height()*newScale))/newScale }
+
+	// Additional Modifications of Offset in case of mouse moves.
+	// 	offset.x -= originOffset.x
+	// 	offset.y -= originOffset.y
+	// /*EOF Additional Modifications of Offset in case of mouse moves.*/
+	// layer.offset(offset)
+	// curveLayer.offset(offset)
+	// markerLayer.offset(offset)
+	// layer.draw(); 
+	// curveLayer.draw();
+	// markerLayer.draw();
+	mainLayer.draw() ;
+}
+
 var cameraControl = true; 
 $('#container').on('mousewheel', function(event){
 	if(cameraControl){
 
-// 		console.log(layer.height())
+// 		console.log(layer.width(),stage.width(),layer.width()*newScale)
 // return;
 		var evt = event.originalEvent; 
 		var zoom = ( ui.zoom - ( evt.wheelDelta/120 < 0 ? 0.05 : -0.05) ); 
 		ui.zoom = zoom; 
-		var newScale = ui.zoom * zoom; 
-		layer.scale({x:newScale,y:newScale}); 
-		curveLayer.scale({x:newScale,y:newScale});
-
-
-		var offset = {x: 0, y: -(ground.y()-(layer.height()*newScale))/newScale }
-			// }; 
-		console.log(offset); 
-
-		layer.offset(offset)
-		curveLayer.offset(offset)
-		// layer.offsetX(  )
-		// curveLayer.offsetX(  )
-		layer.draw(); 
-		curveLayer.draw();
+		if(ui.zoom<.01) {ui.zoom=.01;}
+		zoomLayers(ui.zoom)
 		return;
 		ui.mouseWheelZoom(event); 
 		ui.zoomAdjust(event); 
@@ -342,7 +460,36 @@ $('#rotate').click(function(){
 	layer.draw(); 
 })
 
+
+$('#container').mousedown(function()
+{
+	dragOn = true;
+})
+$('body').mouseup(function(){
+	dragOn = false;
+	previousEvent=null; 
+})
+
 $('#container').mousemove(function(e){
+	return;
+	if(!dragOn)return;
+	if(previousEvent==null)
+	{
+		previousEvent = e; 
+		return;
+	}
+	originOffset = {x: e.pageX - previousEvent.pageX , y: e.pageY - previousEvent.pageY}
+	var adjust = {x:layer.offset().x-originOffset.x, y:layer.offset().y-originOffset.y}; 
+	layer.offset(adjust);
+	curveLayer.offset(adjust);
+	markerLayer.offset(adjust); 
+	groundLayer.offset({x:groundLayer.offset().x-originOffset.x, y:groundLayer.offset().y-originOffset.y}); 
+
+	previousEvent = e; 
+	layer.draw(); 
+	curveLayer.draw(); 
+	markerLayer.draw(); 
+	groundLayer.draw(); 
 	return;
 	x0=ball.getX(); 
 	y0=ball.getY(); 
@@ -478,7 +625,7 @@ $('#angle').change(function(){
 	circleController.x( pointerPosition.x ); 
 	circleController.y( pointerPosition.y ); 
 	pointerLine.points( [ pointerLine.points()[0], pointerLine.points()[1], circleController.getX(), circleController.getY() ] ); 
-	arrowLayer.draw(); 
+	mainLayer.draw(); 
 	showPath(); 
 }); 
 
@@ -491,15 +638,15 @@ $('#avelocity').change(function(){
 	circleController.x( pointerPosition.x ); 
 	circleController.y( pointerPosition.y ); 
 	pointerLine.points( [ pointerLine.points()[0], pointerLine.points()[1], circleController.getX(), circleController.getY() ] ); 
-	arrowLayer.draw(); 
+	mainLayer.draw(); 
 	showPath(); 
 })
 
 // triangle.rotate( Math.atan2( deltaX,deltaY ) * (180/Math.PI) )
 
-console.log( pointerLine.points() )
-arrowLayer.add(pointerLine);
-arrowLayer.add(circleController)
-arrowLayer.draw();  
+// console.log( pointerLine.points() )
+// mainGroup.add(pointerLine);
+// mainGroup.add(circleController)
+// mainGroup.draw();  
 
 ui.zoom = 1; 

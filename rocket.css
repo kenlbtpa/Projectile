@@ -58,7 +58,7 @@ body
 	margin-bottom:-12px;
 }
 
-.explaintip
+.hidden-explaintip
 {
-	display:none;
+	/*display:none;*/
 }
