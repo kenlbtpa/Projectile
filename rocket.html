@@ -34,27 +34,80 @@
 		container:'container',
 		width:$('#container').width(),
 		height:300
-	
 	});
 
-	var ground = new Kinetic.Rect({
-		x:-10,
+	var mainLayer = new Kinetic.Layer(); 
+
+	var baseGroundProp = {		
+		x:-10000,
 		y:stage.getHeight()-50, 
-		width:stage.getWidth()+20,
-		height:70,
+		width:100000,
+		height:1000000
+	}; 
+
+	var modGroundProp = {
+		x:0,
+		y:0, 
+		width:0,
+		height:0
+	}
+
+	var mainGroup = new Kinetic.Group({
+		draggable:true,
+		dragBoundFunc: function(pos)
+		{
+			// console.log(mainGroup.position())
+			var absX = Math.abs(mainGroup.position().x); 
+			var absY = Math.abs(mainGroup.position().y); 
+
+			modGroundProp.x -= absX/2;
+			modGroundProp.width += absX; 
+			modGroundProp.height += absY; 
+
+			ground.x(ground.x() + modGroundProp.x); 
+			ground.width( ground.width() + modGroundProp.width); 
+			ground.height( ground.height() + modGroundProp.height); 
+
+			background.x(background.x() + modGroundProp.x); 
+			background.width( background.width() + modGroundProp.width); 
+			background.height( background.height() + modGroundProp.height); 
+			restrictGroundAndBackground(); 
+
+			mainLayer.draw();
+			return pos; 
+		}
+	})
+
+	var ground = new Kinetic.Rect({
+		x:0,
+		y:stage.getHeight()-50, 
+		width:100000,
+		height:1000000,
 		fill:'brown',
 		stroke:'2'
 	});
 
+	var background = new Kinetic.Rect({
+		x:ground.x(),
+		y:-100000,
+		width:ground.width(),
+		height:ground.height()-(-100000),
+		fill:'white',
+		opacity:0
+	})
+
 	var startP={x:50,y:ground.getY()-10}
 
-	var layer=new Kinetic.Layer({
-		width:stage.width(),
-		height:ground.y(),
-	}); 
-	var ballLayer=new Kinetic.Layer();  
-	var groundLayer = new Kinetic.Layer(); 
-	var markerLayer = new Kinetic.Layer(); 
+	// var layer=new Kinetic.Layer({
+	// 	width:stage.width(),
+	// 	height:ground.y(),
+	// }); 
+	// var ballLayer=new Kinetic.Layer();  
+	// var groundLayer = new Kinetic.Layer(); 
+	// var markerLayer = new Kinetic.Layer({
+	// 	width:stage.width(),
+	// 	height:ground.y(),
+	// }); 
 	
 	var ball=new Kinetic.Circle({
 		x:startP.x,
@@ -63,26 +116,26 @@
 		fill:'green',
 		stroke:'2' 
 	});  
-	var cannon; 
-	var cannonImage=new Image(); 
-	cannonImage.onload = function(){
-		cannon=new Kinetic.Image({
-		x:startP.x,
-		y:startP.y,
-		width:ball.width()*1.6,
-		height:ball.height()*1.6,
-		image:cannonImage,
-		offset:{x:ball.getWidth()*1.6/2,y:ball.getHeight()*1.9/2},
-		opacity:0,
-		}); 
+	// var cannon; 
+	// var cannonImage=new Image(); 
+	// cannonImage.onload = function(){
+	// 	cannon=new Kinetic.Image({
+	// 	x:startP.x,
+	// 	y:startP.y,
+	// 	width:ball.width()*1.6,
+	// 	height:ball.height()*1.6,
+	// 	image:cannonImage,
+	// 	offset:{x:ball.getWidth()*1.6/2,y:ball.getHeight()*1.9/2},
+	// 	opacity:0,
+	// 	}); 
 
-		// console.log(cannongImage.width()); 
-		layer.add(cannon); 
-		ball.moveToTop(); 
-		layer.draw(); 
-	}
+	// 	// console.log(cannongImage.width()); 
+	// 	layer.add(cannon); 
+	// 	ball.moveToTop(); 
+	// 	layer.draw(); 
+	// }
 
-	cannonImage.src="images/CannonPart.png"; 
+	// cannonImage.src="images/CannonPart.png"; 
 
 	var quadLine = new Kinetic.Line({
 	  dash:[10,10],
@@ -93,41 +146,66 @@
 	  opacity: 0.3
 	});
 
-	var curveLayer = new Kinetic.Layer(); 
+	// var curveLayer = new Kinetic.Layer({
+	// 	width:stage.width(),
+	// 	height:ground.y(),
+	// }); 
 
-	function drawCurves() {
-        var context = curveLayer.getContext();
-        context.clear();
+	// function drawCurves() {
+ //        var context = curveLayer.getContext();
+ //        context.clear();
+ //        // draw bezier
+ //        context.beginPath();
+ //        context.moveTo(10,10);
+ //        context.bezierCurveTo(12,15, 30,40, 10,50);
+ //        context.setAttr('strokeStyle', 'blue');
+ //        context.setAttr('lineWidth', 4);
+ //        context.stroke();
+ //      }
 
-        // draw bezier
-        context.beginPath();
-        context.moveTo(10,10);
-        context.bezierCurveTo(12,15, 30,40, 10,50);
-        context.setAttr('strokeStyle', 'blue');
-        context.setAttr('lineWidth', 4);
-        context.stroke();
-      }
-
-    var gridLayer = new Kinetic.Layer(); 
-    var gridRect = new Kinetic.Rect({
-    	x:0,y:0,
-    	width:stage.getWidth(),
-    	height:stage.getHeight(),
-    	fill:'transparent'
-    }); 
+ //    var gridLayer = new Kinetic.Layer(); 
+ //    var gridRect = new Kinetic.Rect({
+ //    	x:0,y:0,
+ //    	width:stage.getWidth(),
+ //    	height:stage.getHeight(),
+ //    	fill:'transparent'
+ //    }); 
 
     var uiLayer = new Kinetic.Layer(); 
+    // var arrowLayer = new Kinetic.Layer({opacity:0}); 
 
-    var arrowLayer = new Kinetic.Layer({opacity:0}); 
+	// layer.add(ball);
+	// groundLayer.add(ground);  
+	
 
-	layer.add(ball);
-	groundLayer.add(ground);  
-	stage.add(groundLayer);   
-	stage.add(layer); 
-	stage.add(curveLayer); 
-	stage.add(markerLayer); 
+
+	// stage.add(groundLayer);   
+	// stage.add(layer); 
+	// stage.add(curveLayer); 
+	// stage.add(markerLayer); 
+	// stage.add(arrowLayer); 
+	mainGroup.add(ground);
+	mainGroup.add(ball);
+	mainGroup.add(background);
+	background.moveToBottom(); 
+	mainLayer.add(mainGroup); 
+
 	stage.add(uiLayer); 
-	stage.add(arrowLayer); 
+	stage.add(mainLayer);
+
+	// var simpleGroup = new Kinetic.Group();
+	// // var shapeA = new Kinetic.Rect({
+	// // 	x:30,y:50,fill:'red',width:10,height:10,
+	// // })
+
+	// var simpleLayer = new Kinetic.Layer()
+	// simpleGroup.add(ball)
+	// simpleGroup.add(ground)
+	// simpleGroup.add(quadLine)
+	// simpleLayer.add(simpleGroup);
+	
+	// stage.add(simpleLayer)
+
 </script>
 <br/>
 
@@ -138,7 +216,7 @@
 		<div>
 			<table border='0' >
 				<tr><td>Time</td> <td> <input id='time' > </td> </tr>
-				<tr><td>Additional Velocity</td> <td> <input id = 'avelocity' value='100' > </td> </tr>
+				<tr><td>Additional Velocity</td> <td> <input id = 'avelocity' value='50' > </td> </tr>
 				<tr><td>Acceleration</td> <td> <input id = 'acceleration' value='0' > </td> </tr>
 				<tr><td>Angle</td> <td> <input id = 'angle' value='45' > </td> </tr>
 				<tr><td>Gravity</td> <td> <input id = 'gravity' value='-9.8' > </td> </tr>
