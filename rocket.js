@@ -167,7 +167,8 @@ function showPath()
 		else
 		{
 			explainationTip = 
-			"<div class='hidden-explaintip'>The top point of a projectile is when the the projectile begins to fall.<br />This can be seen as when the vertical velocity of the projectile reaches 0.<br /> v<sub>f</sub>=v<sub>i</sub>+a*t The final velocity is 0.<br /> 0=v<sub>i</sub>+a*t<br/> -v<sub>i</sub>=a*t<br/> -v<sub>i</sub>/a=t<br/> Now that we determine the formula to determine the time where the projectile begins to fall, lets determine the variables. -v<sub>i</sub> is the vertical velocity component of the projectile. <br/> The vertical velocity component of the projectile can be determined by<br/> vsin&Theta;=opp where v is the velocity, &Theta; is the angle, and opp is the vertical velocity component, v<sub>i</sub> <br /> </div>"}
+			"<div class='hidden-explaintip'>The top point of a projectile is when the the projectile begins to fall.<br />This can be seen as when the vertical velocity of the projectile reaches 0.<br /> v<sub>f</sub>=v<sub>i</sub>+a*t The final velocity is 0.<br /> 0=v<sub>i</sub>+a*t<br/> -v<sub>i</sub>=a*t<br/> -v<sub>i</sub>/a=t<br/> Now that we determine the formula to determine the time where the projectile begins to fall, lets determine the variables. -v<sub>i</sub> is the vertical velocity component of the projectile. <br/> The vertical velocity component of the projectile can be determined by<br/> vsin&Theta;=opp where v is the velocity, &Theta; is the angle, and opp is the vertical velocity component, v<sub>i</sub> <br /> 
+			</div>"}
 		topPointTip.content = 
 			topPointTipContent + topPointTip.content + "<hr style='margin-top:20px;margin-bottom:15px;'/>"
 		topPointTip.hide(); 
