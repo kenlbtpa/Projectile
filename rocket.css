@@ -46,3 +46,54 @@ body
 {
 	font-family: "Trebuchet MS", Helvetica, sans-serif; 
 }
+
+.opentip-container
+{
+	pointer-events:auto;
+}
+
+.smalltip
+{
+	margin-top:-12px;
+	margin-bottom:-12px;
+}
+
+.hidden-explaintip
+{
+	/*display:none;*/
+}
+
+.caret {
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 4px solid #000000;
+    display: inline-block;
+    /*height: 0;*/
+    opacity: 0.3;
+    vertical-align: center;
+    /*width: 0;*/
+}
+
+.right-caret {
+    border-bottom: 4px solid transparent;
+    border-top: 4px solid transparent;
+    border-left: 4px solid #000000;
+    display: inline-block;
+    /*height: 0;*/
+    opacity: 0.3;
+    vertical-align: center;
+    /*width: 0; */
+}
+
+.right-border
+{
+	padding-left:4px;
+	border-right:1px solid #aaa;
+	vertical-align: center;
+	opacity:0.5;
+}
+
+.expander:hover
+{
+	cursor:pointer;
+}
