@@ -1,7 +1,43 @@
+function TipHolder()
+{
+	this.tipObject = null; 
+}
+
+function Reference()
+{
+	this.point_type = null; 
+	this.x = null; 
+	this.y = null; 
+	this.v = null; 
+	this.angle = null; 
+	this.acceleration = null; 
+	this.gravity = null; 
+	this.a = null; 
+	this.t = null; 
+	this.d = null; 
+	this.tipObj = null; 
+
+	this.Set = function(obj){
+	this.point_type = obj.point_type; 
+	this.x = obj.x; 
+	this.y = obj.y; 
+	this.v = obj.v; 
+	this.angle = obj.angle; 
+	this.acceleration = obj.acceleration; 
+	this.gravity = obj.gravity; 
+	this.a = obj.a; 
+	this.t = obj.t; 
+	this.d = obj.d; 
+	this.tipObj = obj.tipObj; 		
+	}
+}
+
 var velocity = {x:50,y:0}
 var time = isNaN($('#time').val()) || $('#time').val().trim() == "" ? 3 : $('#time').val(); 
 var data = {time:0, avelocity: 0, acceleration: 0, angle: 0, gravity: 0 }
 var andBeyond = false; 
+var referenceValuesFinal = new Reference(); 
+var finalTipHolder = null; 
 
 $('#velocityx').val(velocity.x);
 $('#velocityy').val(velocity.y);
@@ -146,48 +182,16 @@ function showPath()
 		id:'topMarker'
 		})
 
-		/*Tooltip Code*/
-		var topPointTip = new Opentip(
-			"#container",
-			"<hr style='margin-top:5px;margin-bottom:15px;'/><div class='explaintrigger smalltip minimized'>Explanation</div>",
-			{
-				// escapeContent:true,
-				style: "dark",
-				showOn: null,
-				hideTrigger:'closeButton',
-				target:null
-			}
-		); 
+		var topTipHolder = new TipHolder(); 
 
-		var topPointTipContent = "Projectile landed at " + (topPointCircle.x() - ball.x()) + " units away from initial position."; 
-		var explainationTip = ""; 
-		if(andBeyond){
-			"<div class='hidden-explaintip'></div>"
-		}
-		else
-		{
-			explainationTip = 
-			"<div class='hidden-explaintip'>The top point of a projectile is when the the projectile begins to fall.<br />This can be seen as when the vertical velocity of the projectile reaches 0.<br /> v<sub>f</sub>=v<sub>i</sub>+a*t The final velocity is 0.<br /> 0=v<sub>i</sub>+a*t<br/> -v<sub>i</sub>=a*t<br/> -v<sub>i</sub>/a=t<br/> Now that we determine the formula to determine the time where the projectile begins to fall, lets determine the variables. -v<sub>i</sub> is the vertical velocity component of the projectile. <br/> The vertical velocity component of the projectile can be determined by<br/> vsin&Theta;=opp where v is the velocity, &Theta; is the angle, and opp is the vertical velocity component, v<sub>i</sub> <br /> 
-			</div>"}
-		topPointTip.content = 
-			topPointTipContent + topPointTip.content + "<hr style='margin-top:20px;margin-bottom:15px;'/>"
-		topPointTip.hide(); 
-		var completeTip = topPointTip.content + explainationTip; 
+		// displayTip('top', topPoint.x, topPoint.y, {v: aVelocity, ver: yTravelRate, h:xTravelRate}, 
+		// 	angle, acceleration, gravity, (acceleration+gravity), topPointTime, topPoint.y, topTipHolder); 
 
 		topPointCircle.on('mouseup',function(){
-			topPointTip.show(); 
-			var tipDisplayPosition=
-			{
-			 left:$('#opentip-1').position().left,
-			 top:$('#opentip-1').position().top
-			}		 
-
-			$('.explaintrigger').click(function(){
-				topPointTip.setContent(completeTip); 
-				$('#opentip-1').offset(tipDisplayPosition)
-			}); 
-
+			displayTip('top', topPoint.x, topPoint.y, {v: aVelocity, ver: yTravelRate, h:xTravelRate}, 
+				angle, acceleration, gravity, (acceleration+gravity), topPointTime, topPoint.y, topTipHolder); 
 		}); 
+
 		/*EOF Tooltip Code*/
 
 		mainGroup.add(topPointCircle); 
@@ -204,6 +208,8 @@ function showPath()
 		mainGroup.add(topMarkerLine); 
 	}
 
+
+
 	if(mainGroup.find('#finalMarker').length != 0)
 	{
 		var finalMarker = mainGroup.find('#finalMarker')[0]
@@ -212,6 +218,11 @@ function showPath()
 		var finalMarkerLine = mainGroup.find('#finalMarkerLine')[0]; 
 		finalMarkerLine.points([ finalPointCircle.x() , finalPointCircle.y(), finalPointCircle.x(), ground.y() ])
 		finalMarker.moveToTop(); 
+		
+		referenceValuesFinal.Set({point_type:'final', x:finalPoint.x, y:finalPoint.y, v:{v: aVelocity, ver: yTravelRate, h:xTravelRate},
+		angle:angle, acceleration:acceleration, gravity:gravity, a:(acceleration+gravity),t:timeElapsed, d:finalPoint.y, 
+		tipObj: finalTipHolder}); 
+
 	}
 	else
 	{
@@ -224,39 +235,49 @@ function showPath()
 		id:'finalMarker'
 		})
 
-		/*Tooltip Code*/
-		var finalPointTip = new Opentip(
-			"#container",
-			"<hr style='margin-top:5px;margin-bottom:15px;'/><div class='explaintrigger smalltip minimized'>Explanation</div>",
-			{
-				// escapeContent:true,
-				style: "dark",
-				showOn: null,
-				hideTrigger:'closeButton',
-				target:null
-			}
-		); 
+		finalTipHolder = new TipHolder(); 
 
-		var finalPointTipContent = "Projectile landed at " + (finalPointCircle.x() - ball.x()) + " units away from initial position."; 
-		var explainationTip = "<div class='hidden-explaintip'>Here is the math.<br/>asdf<br/>asdf\n\nasdf</div>"; 
-		finalPointTip.content = 
-			finalPointTipContent + finalPointTip.content + "<hr style='margin-top:20px;margin-bottom:15px;'/>"
-		finalPointTip.hide(); 
+
+		referenceValuesFinal.Set({point_type:'final', x:finalPoint.x, y:finalPoint.y, v:{v: aVelocity, ver: yTravelRate, h:xTravelRate},
+		angle:angle, acceleration:acceleration, gravity:gravity, a:(acceleration+gravity),t:timeElapsed, d:finalPoint.y, 
+		tipObj: finalTipHolder}); 
+
+		// displayTip('final', finalPoint.x, finalPoint.y, {v: aVelocity, ver: yTravelRate, h:xTravelRate}, 
+		// 	angle, acceleration, gravity, (acceleration+gravity), timeElapsed, finalPoint.y, finalTipHolder); 
+		displayTip(referenceValuesFinal); 
+
+		console.log("ShowPath", referenceValuesFinal); 
 
 		finalPointCircle.on('mouseup',function(){
-			finalPointTip.show(); 
-			var tipDisplayPosition=
-			{
-			 left:$('#opentip-2').position().left,
-			 top:$('#opentip-2').position().top
-			}		 
-
-			$('.explaintrigger').click(function(){
-				finalPointTip.setContent(finalPointTip.content + explainationTip); 
-				$('#opentip-2').offset(tipDisplayPosition)
-			}); 
-
+			// displayTip('final', finalPoint.x, finalPoint.y, {v: aVelocity, ver: yTravelRate, h:xTravelRate}, 
+			// 	angle, acceleration, gravity, (acceleration+gravity), timeElapsed, finalPoint.y, finalTipHolder); 
+			console.log("Mouseup", referenceValuesFinal); 
+			displayTip(referenceValuesFinal); 
+		
 		}); 
+
+		// /*Tooltip Code*/
+		// var finalPointTip = new Opentip(
+		// 	"#container",
+		// 	"<hr style='margin-top:5px;margin-bottom:15px;'/><div class='explaintrigger smalltip minimized'>Explanation</div>",
+		// 	{
+		// 		// escapeContent:true,
+		// 		style: "dark",
+		// 		showOn: null,
+		// 		hideTrigger:'closeButton',
+		// 		target:null
+		// 	}
+		// ); 
+
+		// var finalPointTipContent = "Projectile landed at " + (finalPointCircle.x() - ball.x()) + " units away from initial position."; 
+		// var explainationTip = "<div class='hidden-explaintip'>Here is the math.<br/>asdf<br/>asdf\n\nasdf</div>"; 
+		// finalPointTip.content = 
+		// 	finalPointTipContent + finalPointTip.content + "<hr style='margin-top:20px;margin-bottom:15px;'/>"
+		// finalPointTip.hide(); 
+
+		// finalPointCircle.on('mouseup',function(){
+		// 	// displayTip('final', finalPoint.x, finalPoint.y, {v: aVelocity, ver: yTravelRate, h:xTravelRate}, angle, acceleration, gravity, timeElapsed, finalPoint.x); 
+		// }); 
 		/*EOF Tooltip Code*/
 
 		var finalMarkerLine = new Kinetic.Line({
@@ -623,7 +644,7 @@ var shinyWedge = new Kinetic.Wedge({
 	x: wedgeBackground.x(),
 	y: wedgeBackground.y(),
 	radius: (wedgeBackground.radius()*(Number($('#avelocity').val())/100)), 
-	angle: 30,
+	angle: 30,	
 	rotation: (-Number($('#angle').val())-10), 
 	fillRadialGradientStartRadius: 0, 
 	fillRadialGradientEndRadius: 100, 
@@ -798,3 +819,7 @@ uiLayer.add(zoomRect);
 uiLayer.add(zoomText); 
 
 uiLayer.draw();
+
+$('#displayData').click(function(){
+	console.log($('#opentip-1')[0] , $('#opentip-2')[0] , $('#opentip-3')[0] )
+})
