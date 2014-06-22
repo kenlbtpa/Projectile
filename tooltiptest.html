@@ -1,0 +1,60 @@
+<html>
+<body>
+
+<div class="header">
+<ul class="nav nav-pills pull-right">
+  <li><a href="#">About</a></li>
+  <li><a href="#">Contact</a></li>
+</ul>
+<h3 class="text-muted">Projectile Launcher</h3>
+</div>
+
+<div class='jumbotron' >
+	<div id='container' style='border:1px solid black;background-color:white;'>
+	</div>
+</div>
+
+<hr style='max-width:830px;' />
+
+<script src='js/jquery-1.11.1.min.js'></script>
+<script src='js/kinetic-v5.1.0.js'></script>
+<script src='js/jquery.timeago.js'></script>
+<script src='opentip-master/downloads/opentip-jquery.js'></script>
+<script src='opentip-master/lib/adapter-jquery.js'></script>
+<link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="css/bootstrap-theme.css">
+<link rel="stylesheet" type="text/css" href="css/bootstrap-theme.min.css">
+<link rel="stylesheet" type="text/css" href="rocket.css">
+<link rel="stylesheet" type="text/css" href="opentip-master/css/opentip.css">
+<script src='js/bootstrap.js'></script>
+<script src='js/bootstrap.min.js'></script>
+<script src='tooltip.js'></script>
+<script defer='defer'>
+	var stage= new Kinetic.Stage({
+		container:'container',
+		width:$('#container').width(),
+		height:300
+	});
+
+	var layer = new Kinetic.Layer()
+
+	var ball = new Kinetic.Circle({
+		x:100,y:100,radius:10, fill:'white', stroke:'1'
+	})
+
+	ball.on('click',function(){
+		displayTip("final", 100, 100, {v:100, h:100, ver:100}, 45, 35, 1, 2, 3, 4, 10, 11); 
+	})
+
+	layer.add(ball); 
+	// add the layer to the stage
+	stage.add(layer);
+
+	// ball.fire('click');
+</script>
+<script src='tooltip.js'></script>
+<link rel="stylesheet" type="text/css" href="rocket.css">
+
+</body>
+</html>
